@@ -10,7 +10,7 @@ fi
 timedatectl set-ntp true
 timedatectl status
 
-lsblk -f
+lsblk -p
 echo 'Please select a disk to partition'
 read archdisk
 (
@@ -52,9 +52,6 @@ arch-chroot /mnt echo "LANG=en_US.UTF-8" > /etc/locale.conf
 echo 'Enter desired hostname'
 read hostname
 arch-chroot /mnt echo $hostname > /etc/hostname
-arch-chroot /mnt echo "127.0.0.1\tlocalhost" > /etc/hosts
-arch-chroot /mnt echo "::1\tlocalhost" >> /etc/hosts
-arch-chroot /mnt echo "127.0.1.1\t$hostname.local\t$hostname" >> /etc/hosts
 
 arch-chroot /mnt mkinitcpio -p linux
 
@@ -74,8 +71,11 @@ echo 'Configure WiFi? (y/N)'
 read wifi
 if [ $wifi = 'y' ] ; then
 	arch-chroot /mnt pacman -S --noconfirm networkmanager
-	arch-chroot /mnt systemctl enable networkmanager
+	arch-chroot /mnt systemctl enable NetworkManager
 fi
+arch-chroot /mnt echo "127.0.0.1\tlocalhost" > /etc/hosts
+arch-chroot /mnt echo "::1\tlocalhost" >> /etc/hosts
+arch-chroot /mnt echo "127.0.1.1\t$hostname.local\t$hostname" >> /etc/hosts
 
 umount -R /mnt
 cryptsetup close crypthome
