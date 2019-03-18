@@ -88,10 +88,12 @@ if [ $wifi = 'y' ] ; then
 	arch-chroot /mnt pacman -S --noconfirm networkmanager
 	arch-chroot /mnt systemctl enable NetworkManager
 fi
+arch-chroot /mnt touch /etc/hosts
 arch-chroot /mnt echo "127.0.0.1\tlocalhost" > /etc/hosts
 arch-chroot /mnt echo "::1\tlocalhost" >> /etc/hosts
 arch-chroot /mnt echo "127.0.1.1\t$hostname.local\t$hostname" >> /etc/hosts
 
+arch-chroot /mnt mkdir /etc/systemd/system/getty@tty1.service.d
 arch-chroot /mnt touch /etc/systemd/system/getty@tty1.service.d/override.conf
 arch-chroot /mnt echo '[Service]' > /etc/systemd/system/getty@tty1.service.d/override.conf
 arch-chroot /mnt echo 'ExecStart=' > /etc/systemd/system/getty@tty1.service.d/override.conf
