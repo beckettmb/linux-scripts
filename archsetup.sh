@@ -65,7 +65,21 @@ arch-chroot /mnt pacman -S --noconfirm sudo
 arch-chroot /mnt sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 arch-chroot /mnt useradd -m -G wheel -s /bin/zsh admin
 arch-chroot /mnt passwd admin
-arch-chroot /mnt passwd -l root
+
+arch-chroot /mnt echo '# Lines configured by zsh-newuser-install' > /home/admin/.zshrc
+arch-chroot /mnt echo 'HISTFILE=~/.zsh_history' >> /home/admin/.zshrc
+arch-chroot /mnt echo 'HISTSIZE=1000' >> /home/admin/.zshrc
+arch-chroot /mnt echo 'SAVEHIST=1000' >> /home/admin/.zshrc
+arch-chroot /mnt echo 'setopt appendhistory autocd' >> /home/admin/.zshrc
+arch-chroot /mnt echo 'unsetopt beep' >> /home/admin/.zshrc
+arch-chroot /mnt echo 'bindkey -v' >> /home/admin/.zshrc
+arch-chroot /mnt echo '# End of lines configured by zsh-newuser-install' >> /home/admin/.zshrc
+arch-chroot /mnt echo '# The following lines were added by compinstall' >> /home/admin/.zshrc
+arch-chroot /mnt echo "zstyle :compinstall filename '/home/admin/.zshrc'" >> /home/admin/.zshrc
+arch-chroot /mnt echo 'autoload -Uz compinit' >> /home/admin/.zshrc
+arch-chroot /mnt echo 'compinit' >> /home/admin/.zshrc
+arch-chroot /mnt echo '# End of lines added by compinstall' >> /home/admin/.zshrc
+arch-chroot /mnt echo "PROMPT='%n%f@%m%f %~%f %# '" >> /home/admin/.zshrc
 
 echo 'Configure WiFi? (y/N)'
 read wifi
