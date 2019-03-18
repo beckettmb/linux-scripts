@@ -47,11 +47,11 @@ arch-chroot /mnt ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime
 arch-chroot /mnt hwclock --systohc
 arch-chroot /mnt sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 arch-chroot /mnt locale-gen
-arch-chroot /mnt echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 
 echo 'Enter desired hostname'
 read hostname
-arch-chroot /mnt echo $hostname > /etc/hostname
+echo $hostname > /mnt/etc/hostname
 
 arch-chroot /mnt mkinitcpio -p linux
 
@@ -66,21 +66,21 @@ arch-chroot /mnt sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/su
 arch-chroot /mnt useradd -m -G wheel -s /bin/zsh admin
 arch-chroot /mnt passwd admin
 
-arch-chroot /mnt touch /home/admin/.zshrc
-arch-chroot /mnt echo '# Lines configured by zsh-newuser-install' > /home/admin/.zshrc
-arch-chroot /mnt echo 'HISTFILE=~/.zsh_history' >> /home/admin/.zshrc
-arch-chroot /mnt echo 'HISTSIZE=1000' >> /home/admin/.zshrc
-arch-chroot /mnt echo 'SAVEHIST=1000' >> /home/admin/.zshrc
-arch-chroot /mnt echo 'setopt appendhistory autocd' >> /home/admin/.zshrc
-arch-chroot /mnt echo 'unsetopt beep' >> /home/admin/.zshrc
-arch-chroot /mnt echo 'bindkey -v' >> /home/admin/.zshrc
-arch-chroot /mnt echo '# End of lines configured by zsh-newuser-install' >> /home/admin/.zshrc
-arch-chroot /mnt echo '# The following lines were added by compinstall' >> /home/admin/.zshrc
-arch-chroot /mnt echo "zstyle :compinstall filename '/home/admin/.zshrc'" >> /home/admin/.zshrc
-arch-chroot /mnt echo 'autoload -Uz compinit' >> /home/admin/.zshrc
-arch-chroot /mnt echo 'compinit' >> /home/admin/.zshrc
-arch-chroot /mnt echo '# End of lines added by compinstall' >> /home/admin/.zshrc
-arch-chroot /mnt echo "PROMPT='%n%f@%m%f %~%f %# '" >> /home/admin/.zshrc
+echo '# Lines configured by zsh-newuser-install' > /mnt/home/admin/.zshrc
+echo 'HISTFILE=~/.zsh_history' >> /mnt/home/admin/.zshrc
+echo 'HISTSIZE=1000' >> /mnt/home/admin/.zshrc
+echo 'SAVEHIST=1000' >> /mnt/home/admin/.zshrc
+echo 'setopt appendhistory autocd' >> /mnt/home/admin/.zshrc
+echo 'unsetopt beep' >> /mnt/home/admin/.zshrc
+echo 'bindkey -v' >> /mnt/home/admin/.zshrc
+echo '# End of lines configured by zsh-newuser-install' >> /mnt/home/admin/.zshrc
+echo '# The following lines were added by compinstall' >> /mnt/home/admin/.zshrc
+echo "zstyle :compinstall filename '/home/admin/.zshrc'" >> /mnt/home/admin/.zshrc
+echo 'autoload -Uz compinit' >> /mnt/home/admin/.zshrc
+echo 'compinit' >> /mnt/home/admin/.zshrc
+echo '# End of lines added by compinstall' >> /mnt/home/admin/.zshrc
+echo "PROMPT='%n%f@%m%f %~%f %# '" >> /mnt/home/admin/.zshrc
+chown admin:admin /mnt/home/admin/.zshrc
 
 echo 'Configure WiFi? (y/N)'
 read wifi
@@ -88,16 +88,14 @@ if [ $wifi = 'y' ] ; then
 	arch-chroot /mnt pacman -S --noconfirm networkmanager
 	arch-chroot /mnt systemctl enable NetworkManager
 fi
-arch-chroot /mnt touch /etc/hosts
-arch-chroot /mnt echo "127.0.0.1\tlocalhost" > /etc/hosts
-arch-chroot /mnt echo "::1\tlocalhost" >> /etc/hosts
-arch-chroot /mnt echo "127.0.1.1\t$hostname.local\t$hostname" >> /etc/hosts
+echo "127.0.0.1\tlocalhost" > /mnt/etc/hosts
+echo "::1\tlocalhost" >> /mnt/etc/hosts
+echo "127.0.1.1\t$hostname.local\t$hostname" >> /mnt/etc/hosts
 
 arch-chroot /mnt mkdir /etc/systemd/system/getty@tty1.service.d
-arch-chroot /mnt touch /etc/systemd/system/getty@tty1.service.d/override.conf
-arch-chroot /mnt echo '[Service]' > /etc/systemd/system/getty@tty1.service.d/override.conf
-arch-chroot /mnt echo 'ExecStart=' > /etc/systemd/system/getty@tty1.service.d/override.conf
-arch-chroot /mnt echo 'ExecStart=-/usr/bin/agetty --autologin root --noclear %I $TERM' > /etc/systemd/system/getty@tty1.service.d/override.conf
+echo '[Service]' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+echo 'ExecStart=' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+echo 'ExecStart=-/usr/bin/agetty --autologin root --noclear %I $TERM' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
 
-umount -R /mnt
-cryptsetup close crypthome
+#umount -R /mnt
+#cryptsetup close crypthome
