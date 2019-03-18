@@ -87,15 +87,31 @@ read wifi
 if [ $wifi = 'y' ] ; then
 	arch-chroot /mnt pacman -S --noconfirm networkmanager
 	arch-chroot /mnt systemctl enable NetworkManager
+#	echo "echo 'Please enter WiFi SSID'" >> /mnt/root/.bash_profile
+#	echo "read ssid" >> /mnt/root/.bash_profile
+#	echo "echo 'Please enter WiFi password'" >> /mnt/root/.bash_profile
+#	echo "read password" >> /mnt/root/.bash_profile
+#	echo "nmcli device wifi connect \$ssid password \$password" >> /mnt/root/.bash_profile
 fi
 echo "127.0.0.1\tlocalhost" > /mnt/etc/hosts
-echo "::1\tlocalhost" >> /mnt/etc/hosts
+echo "::1\t\tlocalhost" >> /mnt/etc/hosts
 echo "127.0.1.1\t$hostname.local\t$hostname" >> /mnt/etc/hosts
 
-arch-chroot /mnt mkdir /etc/systemd/system/getty@tty1.service.d
-echo '[Service]' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
-echo 'ExecStart=' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
-echo 'ExecStart=-/usr/bin/agetty --autologin root --noclear %I $TERM' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+#arch-chroot /mnt mkdir /etc/systemd/system/getty@tty1.service.d
+#echo '[Service]' > /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+#echo 'ExecStart=' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+#echo 'ExecStart=-/usr/bin/agetty --autologin root --noclear %I $TERM' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+
+#echo "rm -fr /etc/systemd/system/getty@tty1.service.d/" >> /mnt/root/.bash_profile
+#echo "systemctl daemon-reload" >> /mnt/root/.bash_profile
+#echo "passwd -l root" >> /mnt/root/.bash_profile
+#echo "rm /root/.bash_profile; exit" >> /mnt/root/.bash_profile
+
+pacman -S --noconfirm tmux
+pacman -S --noconfirm base-devel
+pacman -S --noconfirm make
+pacman -S --noconfirm git
 
 #umount -R /mnt
 #cryptsetup close crypthome
+#reboot
