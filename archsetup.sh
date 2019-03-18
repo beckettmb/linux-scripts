@@ -65,7 +65,6 @@ arch-chroot /mnt pacman -S --noconfirm sudo
 arch-chroot /mnt sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 arch-chroot /mnt useradd -m -G wheel -s /bin/zsh admin
 arch-chroot /mnt passwd admin
-
 echo '# Lines configured by zsh-newuser-install' > /mnt/home/admin/.zshrc
 echo 'HISTFILE=~/.zsh_history' >> /mnt/home/admin/.zshrc
 echo 'HISTSIZE=1000' >> /mnt/home/admin/.zshrc
@@ -80,37 +79,40 @@ echo 'autoload -Uz compinit' >> /mnt/home/admin/.zshrc
 echo 'compinit' >> /mnt/home/admin/.zshrc
 echo '# End of lines added by compinstall' >> /mnt/home/admin/.zshrc
 echo "PROMPT='%n%f@%m%f %~%f %# '" >> /mnt/home/admin/.zshrc
-chown admin:admin /mnt/home/admin/.zshrc
+arch-chroot /mnt chown admin:admin /home/admin/.zshrc
+arch-chroot /mnt passwd -l root
 
 echo 'Configure WiFi? (y/N)'
 read wifi
 if [ $wifi = 'y' ] ; then
 	arch-chroot /mnt pacman -S --noconfirm networkmanager
 	arch-chroot /mnt systemctl enable NetworkManager
-#	echo "echo 'Please enter WiFi SSID'" >> /mnt/root/.bash_profile
-#	echo "read ssid" >> /mnt/root/.bash_profile
-#	echo "echo 'Please enter WiFi password'" >> /mnt/root/.bash_profile
-#	echo "read password" >> /mnt/root/.bash_profile
-#	echo "nmcli device wifi connect \$ssid password \$password" >> /mnt/root/.bash_profile
 fi
 echo "127.0.0.1\tlocalhost" > /mnt/etc/hosts
 echo "::1\t\tlocalhost" >> /mnt/etc/hosts
 echo "127.0.1.1\t$hostname.local\t$hostname" >> /mnt/etc/hosts
 
-#arch-chroot /mnt mkdir /etc/systemd/system/getty@tty1.service.d
-#echo '[Service]' > /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
-#echo 'ExecStart=' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
-#echo 'ExecStart=-/usr/bin/agetty --autologin root --noclear %I $TERM' >> /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+arch-chroot /mnt pacman -S --noconfirm tmux
+arch-chroot /mnt pacman -S --noconfirm base-devel
+arch-chroot /mnt pacman -S --noconfirm make
+arch-chroot /mnt pacman -S --noconfirm git
+arch-chroot /mnt pacman -S --noconfirm wget
 
-#echo "rm -fr /etc/systemd/system/getty@tty1.service.d/" >> /mnt/root/.bash_profile
-#echo "systemctl daemon-reload" >> /mnt/root/.bash_profile
-#echo "passwd -l root" >> /mnt/root/.bash_profile
-#echo "rm /root/.bash_profile; exit" >> /mnt/root/.bash_profile
+echo 'Use GUI? (y/N)'
+read gui
+if [ $gui = 'y' ] ; then
+	arch-chroot /mnt pacman -S --noconfirm xorg-server
+	arch-chroot /mnt pacman -S --noconfirm sddm
+	arch-chroot /mnt systemctl enable sddm
 
-pacman -S --noconfirm tmux
-pacman -S --noconfirm base-devel
-pacman -S --noconfirm make
-pacman -S --noconfirm git
+	arch-chroot /mnt pacman -S --noconfirm kscreen
+	arch-chroot /mnt pacman -S --noconfirm i3-gaps i3status i3 blocks
+	arch-chroot /mnt mkdir /home/admin/packages
+	arch-chroot /mnt chown admin:admin /home/admin/packages
+	arch-chroot /mnt git clone https://aur.archlinux.org/i3lock-color.git /home/admin/packages/i3lock-color
+
+	arch-chroot /mnt pacman -S --noconfirm termite
+fi
 
 #umount -R /mnt
 #cryptsetup close crypthome
