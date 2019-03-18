@@ -66,6 +66,7 @@ arch-chroot /mnt sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/su
 arch-chroot /mnt useradd -m -G wheel -s /bin/zsh admin
 arch-chroot /mnt passwd admin
 
+arch-chroot /mnt touch /home/admin/.zshrc
 arch-chroot /mnt echo '# Lines configured by zsh-newuser-install' > /home/admin/.zshrc
 arch-chroot /mnt echo 'HISTFILE=~/.zsh_history' >> /home/admin/.zshrc
 arch-chroot /mnt echo 'HISTSIZE=1000' >> /home/admin/.zshrc
@@ -90,6 +91,11 @@ fi
 arch-chroot /mnt echo "127.0.0.1\tlocalhost" > /etc/hosts
 arch-chroot /mnt echo "::1\tlocalhost" >> /etc/hosts
 arch-chroot /mnt echo "127.0.1.1\t$hostname.local\t$hostname" >> /etc/hosts
+
+arch-chroot /mnt touch /etc/systemd/system/getty@tty1.service.d/override.conf
+arch-chroot /mnt echo '[Service]' > /etc/systemd/system/getty@tty1.service.d/override.conf
+arch-chroot /mnt echo 'ExecStart=' > /etc/systemd/system/getty@tty1.service.d/override.conf
+arch-chroot /mnt echo 'ExecStart=-/usr/bin/agetty --autologin root --noclear %I $TERM' > /etc/systemd/system/getty@tty1.service.d/override.conf
 
 umount -R /mnt
 cryptsetup close crypthome
