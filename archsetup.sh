@@ -132,7 +132,7 @@ if [ $gui = 'y' ] ; then
 	arch-chroot /mnt pacman -S --noconfirm terminus-font
 
 	echo "opacity-rule = [\"85:class_g = 'Termite'\"];" > /mnt/home/admin/.config/compton.conf
-	arch-chroot /mnt mkdir /home/admin/config/termite
+	arch-chroot /mnt mkdir /home/admin/.config/termite
 	echo "[options]" > /mnt/home/admin/.config/termite/config
 	echo "font = xft:terminus 16px" >> /mnt/home/admin/.config/termite/config
 
