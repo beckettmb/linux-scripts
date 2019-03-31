@@ -13,11 +13,15 @@ timedatectl status
 lsblk -p
 echo 'Please select a disk to partition'
 read archdisk
+echo 'How large root in G?'
+read rootpart
+echo 'How large swap in G?'
+read swappart
 (
 	echo o
 	echo n; echo p; echo 1; echo ''; echo +550M; echo t; echo '83'; echo a
-	echo n; echo p; echo 2; echo ''; echo +1G; echo t; echo 2; echo '82'
-	echo n; echo p; echo 3; echo ''; echo +9G; echo t; echo 3; echo '83'
+	echo n; echo p; echo 2; echo ''; echo '+'$swappart'G'; echo t; echo 2; echo '82'
+	echo n; echo p; echo 3; echo ''; echo '+'$rootpart'G'; echo t; echo 3; echo '83'
 	echo n; echo p; echo ''; echo ''; echo t; echo 4; echo '83'
 	echo w; echo q
 ) | fdisk $archdisk
@@ -61,9 +65,7 @@ echo "iVBORw0KGgoAAAANSUhEUgAABQAAAAPACAMAAABdAiRLAAADAFBMVEUDBQEHCQUKDAgMDwsPEQ
 echo "GRUB_BACKGROUND=/boot/grub/grub-background.png" >> /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
-arch-chroot /mnt pacman -S --noconfirm vim
-arch-chroot /mnt pacman -S --noconfirm zsh
-arch-chroot /mnt pacman -S --noconfirm sudo
+arch-chroot /mnt pacman -S --noconfirm vim zsh sudo tmux base-devel make git wget
 arch-chroot /mnt sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 arch-chroot /mnt useradd -m -G wheel -s /bin/zsh admin
 arch-chroot /mnt passwd admin
@@ -94,15 +96,12 @@ echo "127.0.0.1\tlocalhost" > /mnt/etc/hosts
 echo "::1\t\tlocalhost" >> /mnt/etc/hosts
 echo "127.0.1.1\t$hostname.local\t$hostname" >> /mnt/etc/hosts
 
-arch-chroot /mnt pacman -S --noconfirm tmux base-devel make git wget
-
 echo 'Use GUI? (y/N)'
 read gui
 if [ $gui = 'y' ] ; then
-	arch-chroot /mnt pacman -S --noconfirm xorg-server sddm
+	arch-chroot /mnt pacman -S --noconfirm xorg-server sddm kscreen i3-gaps i3status i3blocks plasma-workspace termite dmenu firefox thunar compton terminus-font feh fcitx fcitx-mozc fcitx-im fcitx-configtool otf-ipafont noto-fonts noto-fonts-extra noto-fonts-cjk
 	arch-chroot /mnt systemctl enable sddm
 
-	arch-chroot /mnt pacman -S --noconfirm kscreen i3-gaps i3status i3blocks
 	arch-chroot /mnt mkdir /home/admin/packages
 	arch-chroot /mnt git clone https://aur.archlinux.org/i3lock-color.git /home/admin/packages/i3lock-color
 	arch-chroot /mnt git clone https://aur.archlinux.org/bicon-git.git /home/admin/packages/bicon-git
@@ -116,32 +115,21 @@ if [ $gui = 'y' ] ; then
 	arch-chroot /mnt sudo -u admin /home/admin/packages.sh
 	rm /mnt/home/admin/packages.sh
 
-
 	mkdir /mnt/home/admin/.config
 	mkdir /mnt/home/admin/.config/i3
 	echo "c2V0ICRtb2QgTW9kNApmb250IHBhbmdvOm1vbm9zcGFjZSA4CmZsb2F0aW5nX21vZGlmaWVyICRtb2QKYmluZHN5bSAkbW9kK1JldHVybiBleGVjIGkzLXNlbnNpYmxlLXRlcm1pbmFsCmJpbmRzeW0gJG1vZCtTaGlmdCtxIGtpbGwKYmluZHN5bSAkbW9kK2QgZXhlYyBkbWVudV9ydW4KYmluZHN5bSAkbW9kK2ogZm9jdXMgbGVmdApiaW5kc3ltICRtb2QrayBmb2N1cyBkb3duCmJpbmRzeW0gJG1vZCtsIGZvY3VzIHVwCmJpbmRzeW0gJG1vZCtzZW1pY29sb24gZm9jdXMgcmlnaHQKYmluZHN5bSAkbW9kK0xlZnQgZm9jdXMgbGVmdApiaW5kc3ltICRtb2QrRG93biBmb2N1cyBkb3duCmJpbmRzeW0gJG1vZCtVcCBmb2N1cyB1cApiaW5kc3ltICRtb2QrUmlnaHQgZm9jdXMgcmlnaHQKYmluZHN5bSAkbW9kK1NoaWZ0K2ogbW92ZSBsZWZ0CmJpbmRzeW0gJG1vZCtTaGlmdCtrIG1vdmUgZG93bgpiaW5kc3ltICRtb2QrU2hpZnQrbCBtb3ZlIHVwCmJpbmRzeW0gJG1vZCtTaGlmdCtzZW1pY29sb24gbW92ZSByaWdodApiaW5kc3ltICRtb2QrU2hpZnQrTGVmdCBtb3ZlIGxlZnQKYmluZHN5bSAkbW9kK1NoaWZ0K0Rvd24gbW92ZSBkb3duCmJpbmRzeW0gJG1vZCtTaGlmdCtVcCBtb3ZlIHVwCmJpbmRzeW0gJG1vZCtTaGlmdCtSaWdodCBtb3ZlIHJpZ2h0CmJpbmRzeW0gJG1vZCtoIHNwbGl0IGgKYmluZHN5bSAkbW9kK3Ygc3BsaXQgdgpiaW5kc3ltICRtb2QrZiBmdWxsc2NyZWVuIHRvZ2dsZQpiaW5kc3ltICRtb2QrcyBsYXlvdXQgc3RhY2tpbmcKYmluZHN5bSAkbW9kK3cgbGF5b3V0IHRhYmJlZApiaW5kc3ltICRtb2QrZSBsYXlvdXQgdG9nZ2xlIHNwbGl0CmJpbmRzeW0gJG1vZCtTaGlmdCtzcGFjZSBmbG9hdGluZyB0b2dnbGUKYmluZHN5bSAkbW9kK3NwYWNlIGZvY3VzIG1vZGVfdG9nZ2xlCmJpbmRzeW0gJG1vZCthIGZvY3VzIHBhcmVudApzZXQgJHdzMSAiMSIKc2V0ICR3czIgIjIiCnNldCAkd3MzICIzIgpzZXQgJHdzNCAiNCIKc2V0ICR3czUgIjUiCnNldCAkd3M2ICI2IgpzZXQgJHdzNyAiNyIKc2V0ICR3czggIjgiCnNldCAkd3M5ICI5IgpzZXQgJHdzMTAgIjEwIgpiaW5kc3ltICRtb2QrMSB3b3Jrc3BhY2UgJHdzMQpiaW5kc3ltICRtb2QrMiB3b3Jrc3BhY2UgJHdzMgpiaW5kc3ltICRtb2QrMyB3b3Jrc3BhY2UgJHdzMwpiaW5kc3ltICRtb2QrNCB3b3Jrc3BhY2UgJHdzNApiaW5kc3ltICRtb2QrNSB3b3Jrc3BhY2UgJHdzNQpiaW5kc3ltICRtb2QrNiB3b3Jrc3BhY2UgJHdzNgpiaW5kc3ltICRtb2QrNyB3b3Jrc3BhY2UgJHdzNwpiaW5kc3ltICRtb2QrOCB3b3Jrc3BhY2UgJHdzOApiaW5kc3ltICRtb2QrOSB3b3Jrc3BhY2UgJHdzOQpiaW5kc3ltICRtb2QrMTAgd29ya3NwYWNlICR3czEwCmJpbmRzeW0gJG1vZCtTaGlmdCsxIG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3MxCmJpbmRzeW0gJG1vZCtTaGlmdCsyIG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3MyCmJpbmRzeW0gJG1vZCtTaGlmdCszIG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3MzCmJpbmRzeW0gJG1vZCtTaGlmdCs0IG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3M0CmJpbmRzeW0gJG1vZCtTaGlmdCs1IG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3M1CmJpbmRzeW0gJG1vZCtTaGlmdCs2IG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3M2CmJpbmRzeW0gJG1vZCtTaGlmdCs3IG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3M3CmJpbmRzeW0gJG1vZCtTaGlmdCs4IG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3M4CmJpbmRzeW0gJG1vZCtTaGlmdCs5IG1vdmUgY29udGFpbmVyIHRvIHdvcmtzcGFjZSAkd3M5CmJpbmRzeW0gJG1vZCtTaGlmdCsxMCBtb3ZlIGNvbnRhaW5lciB0byB3b3Jrc3BhY2UgJHdzMTAKYmluZHN5bSAkbW9kK1NoaWZ0K2MgcmVsb2FkCmJpbmRzeW0gJG1vZCtTaGlmdCtyIHJlc3RhcnQKYmluZHN5bSAkbW9kK1NoaWZ0K2UgZXhlYyAiaTMtbmFnYmFyIC10IHdhcm5pbmcgLW0gJ1lvdSBwcmVzc2VkIHRoZSBleGl0IHNob3J0Y3V0LiBEbyB5b3UgcmVhbGx5IHdhbnQgdG8gZXhpdCBpMz8gVGhpcyB3aWxsIGVuZCB5b3VyIFggc2Vzc2lvbi4nIC1CICdZZXMsIGV4aXQgaTMnICdpMy1tc2cgZXhpdCciCmJpbmRzeW0gJG1vZCtTaGlmdCt4IGV4ZWMgaTNsb2NrIC1pIH4vbG9ja3NjcmVlbi5wbmcKbW9kZSAicmVzaXplIiB7CgliaW5kc3ltIGogcmVzaXplIHNocmluayB3aWR0aCAxMCBweCBvciAxMCBwcHQKCWJpbmRzeW0gayByZXNpemUgZ3JvdyBoZWlnaHQgMTAgcHggb3IgMTAgcHB0CgliaW5kc3ltIGwgcmVzaXplIHNocmluayBoZWlnaHQgMTAgcHggb3IgMTAgcHB0CgliaW5kc3ltIHNlbWljb2xvbiByZXNpemUgZ3JvdyB3aWR0aCAxMCBweCBvciAxMCBwcHQKCWJpbmRzeW0gTGVmdCByZXNpemUgc2hyaW5rIHdpZHRoIDEwIHB4IG9yIDEwIHBwdAoJYmluZHN5bSBEb3duIHJlc2l6ZSBncm93IGhlaWdodCAxMCBweCBvciAxMCBwcHQKCWJpbmRzeW0gVXAgcmVzaXplIHNocmluayBoZWlnaHQgMTAgcHggb3IgMTAgcHB0CgliaW5kc3ltIFJpZ2h0IHJlc2l6ZSBncm93IHdpZHRoIDEwIHB4IG9yIDEwIHBwdAoJYmluZHN5bSBSZXR1cm4gbW9kZSAiZGVmYXVsdCIKCWJpbmRzeW0gRXNjYXBlIG1vZGUgImRlZmF1bHQiCgliaW5kc3ltICRtb2QrciBtb2RlICJkZWZhdWx0Igp9CmJpbmRzeW0gJG1vZCtyIG1vZGUgInJlc2l6ZSIKYmFyIHsKCXN0YXR1c19jb21tYW5kIGkzc3RhdHVzCn0KZm9yX3dpbmRvdyBbY2xhc3M9Il4uKiJdIGJvcmRlciBwaXhlbCAwCmdhcHMgaW5uZXIgMTAKZXhlYyAtLW5vLXN0YXJ0dXAtaWQgZmVoIC0tYmctZmlsbCAvaG9tZS9hZG1pbi9kZXNrdG9wLnBuZwpleGVjIC0tbm8tc3RhcnR1cC1pZCBmY2l0eCAtZApleGVjIC0tbm8tc3RhcnR1cC1pZCBjb21wdG9uCg==" | base64 -d > /mnt/home/admin/.config/i3/config
-	arch-chroot /mnt pacman -S plasma-workspace
+	sed -i 's/Current=/Current=breeze/' /mnt/usr/lib/sddm/sddm.conf.d/default.conf
 	cp /mnt/usr/share/wallpapers/Next/contents/images/3200x2000.png /mnt/home/admin/lockscreen.png
 	cp /mnt/home/admin/lockscreen.png /mnt/home/admin/desktop.png
-
-	arch-chroot /mnt pacman -S --noconfirm termite
-	arch-chroot /mnt pacman -S --noconfirm dmenu
-	arch-chroot /mnt pacman -S --noconfirm firefox
-	arch-chroot /mnt pacman -S --noconfirm thunar
-	arch-chroot /mnt pacman -S --noconfirm compton
-	arch-chroot /mnt pacman -S --noconfirm terminus-font
 
 	echo "opacity-rule = [\"85:class_g = 'Termite'\"];" > /mnt/home/admin/.config/compton.conf
 	arch-chroot /mnt mkdir /home/admin/.config/termite
 	echo "[options]" > /mnt/home/admin/.config/termite/config
 	echo "font = xft:terminus 16px" >> /mnt/home/admin/.config/termite/config
 
-	arch-chroot /mnt pacman -S --noconfirm fcitx fcitx-mozc fcitx-im fcitx-configtool otf-ipafont
 	echo "export QT_IM_MODULE=fcitx" > /mnt/home/admin/.xprofile
 	echo "export XMODIFIERS=@im=fcitx" >> /mnt/home/admin/.xprofile
 	echo "export GTK_IM_MODULE=fcitx" >> /mnt/home/admin/.xprofile
-
-	arch-chroot /mnt pacman -S --noconfirm noto-fonts noto-fonts-extra noto-fonts-cjk
 	echo 'if [ -z "$BICON" ]; then' >> /mnt/home/admin/.zshrc
 	echo '	export BICON="SET"' >> /mnt/home/admin/.zshrc
 	echo '	exec bicon' >> /mnt/home/admin/.zshrc
@@ -150,6 +138,6 @@ if [ $gui = 'y' ] ; then
 	arch-chroot /mnt chown admin:admin -R /home/admin/
 fi
 
-#umount -R /mnt
-#cryptsetup close crypthome
-#reboot
+umount -R /mnt
+cryptsetup close crypthome
+reboot
